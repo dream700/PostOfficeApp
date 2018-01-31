@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.2-b608 (trunk-7979; 2015-01-21T12:50:19+0000) JAXWS-RI/2.2.11-b150120.1832 JAXWS-API/2.2.12 JAXB-RI/2.2.12-b141219.1637 JAXB-API/2.2.13-b141020.1521 svn-revision#unknown. --><xs:schema xmlns:tns="http://siberia.russianpost.ru/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://siberia.russianpost.ru/">
+
+<xs:element name="count" type="tns:count"/>
+
+<xs:element name="countResponse" type="tns:countResponse"/>
+
+<xs:element name="find" type="tns:find"/>
+
+<xs:element name="findAll" type="tns:findAll"/>
+
+<xs:element name="findAllResponse" type="tns:findAllResponse"/>
+
+<xs:element name="findBarcode" type="tns:findBarcode"/>
+
+<xs:element name="findBarcodeResponse" type="tns:findBarcodeResponse"/>
+
+<xs:element name="findRange" type="tns:findRange"/>
+
+<xs:element name="findRangeResponse" type="tns:findRangeResponse"/>
+
+<xs:element name="findResponse" type="tns:findResponse"/>
+
+<xs:element name="findTicket" type="tns:findTicket"/>
+
+<xs:element name="findTicketResponse" type="tns:findTicketResponse"/>
+
+<xs:element name="historyrecord" type="tns:historyrecord"/>
+
+<xs:element name="ticket" type="tns:ticket"/>
+
+<xs:element name="viewhistory" type="tns:viewhistory"/>
+
+<xs:complexType name="findTicket">
+<xs:sequence>
+<xs:element name="barcode" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="findTicketResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:ticket" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="ticket">
+<xs:sequence>
+<xs:element name="barcode" type="xs:string" minOccurs="0"/>
+<xs:element name="dateFetch" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="historyrecord" type="tns:historyrecord" minOccurs="0" maxOccurs="unbounded"/>
+<xs:element name="isFinal" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="historyrecord">
+<xs:sequence>
+<xs:element name="id" type="xs:int" minOccurs="0"/>
+<xs:element name="destinationaddressDescription" type="xs:string" minOccurs="0"/>
+<xs:element name="destinationAddressIndex" type="xs:string" minOccurs="0"/>
+<xs:element name="operationAddressIndex" type="xs:string" minOccurs="0"/>
+<xs:element name="operationAddressDescription" type="xs:string" minOccurs="0"/>
+<xs:element name="mailDirectID" type="xs:int" minOccurs="0"/>
+<xs:element name="mailDirectNameRU" type="xs:string" minOccurs="0"/>
+<xs:element name="countryOperID" type="xs:int" minOccurs="0"/>
+<xs:element name="complexItemName" type="xs:string" minOccurs="0"/>
+<xs:element name="mass" type="xs:string" minOccurs="0"/>
+<xs:element name="operTypeID" type="xs:int" minOccurs="0"/>
+<xs:element name="operTypeName" type="xs:string" minOccurs="0"/>
+<xs:element name="operAttrID" type="xs:int" minOccurs="0"/>
+<xs:element name="operAttrName" type="xs:string" minOccurs="0"/>
+<xs:element name="operDate" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="lastOperDate" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="sndr" type="xs:string" minOccurs="0"/>
+<xs:element name="rcpn" type="xs:string" minOccurs="0"/>
+<xs:element name="operatonDelta" type="xs:int" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="find">
+<xs:sequence>
+<xs:element name="id" type="xs:anyType" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="findResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:viewhistory" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="viewhistory">
+<xs:sequence>
+<xs:element name="barcode" type="xs:string" minOccurs="0"/>
+<xs:element name="lastoperdate" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="nameattr" type="xs:string" minOccurs="0"/>
+<xs:element name="nametype" type="xs:string" minOccurs="0"/>
+<xs:element name="operationaddressIndex" type="xs:string" minOccurs="0"/>
+<xs:element name="operatondelta" type="xs:int" minOccurs="0"/>
+<xs:element name="operattrid" type="xs:int" minOccurs="0"/>
+<xs:element name="operdate" type="xs:dateTime" minOccurs="0"/>
+<xs:element name="opertypeid" type="xs:int" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="findRange">
+<xs:sequence>
+<xs:element name="range" type="xs:int" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="findRangeResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:viewhistory" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="findBarcode">
+<xs:sequence>
+<xs:element name="barcode" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="findBarcodeResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:viewhistory" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="count">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="countResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:int"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="findAll">
+<xs:sequence/>
+</xs:complexType>
+
+<xs:complexType name="findAllResponse">
+<xs:sequence>
+<xs:element name="return" type="tns:viewhistory" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

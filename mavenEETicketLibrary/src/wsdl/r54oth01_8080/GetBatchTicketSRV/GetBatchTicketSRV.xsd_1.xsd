@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?><!-- Published by JAX-WS RI (http://jax-ws.java.net). RI's version is Metro/2.3.1-b419 (branches/2.3.1.x-7937; 2014-08-04T08:11:03+0000) JAXWS-RI/2.2.10-b140803.1500 JAXWS-API/2.2.11 JAXB-RI/2.2.10-b140802.1033 JAXB-API/2.2.12-b140109.1041 svn-revision#unknown. --><xs:schema xmlns:tns="http://siberia.russianpost.ru/" xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0" targetNamespace="http://siberia.russianpost.ru/">
+
+<xs:element name="GetBatchTickets" type="tns:GetBatchTickets"/>
+
+<xs:element name="GetBatchTicketsResponse" type="tns:GetBatchTicketsResponse"/>
+
+<xs:element name="GetReadyAnswer" type="tns:GetReadyAnswer"/>
+
+<xs:element name="GetReadyAnswerResponse" type="tns:GetReadyAnswerResponse"/>
+
+<xs:element name="NotSupportedException" type="tns:NotSupportedException"/>
+
+<xs:element name="SystemException" type="tns:SystemException"/>
+
+<xs:element name="Test" type="tns:Test"/>
+
+<xs:element name="TestResponse" type="tns:TestResponse"/>
+
+<xs:complexType name="GetBatchTickets">
+<xs:sequence>
+<xs:element name="tickets" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetBatchTicketsResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="SystemException">
+<xs:sequence>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="NotSupportedException">
+<xs:sequence>
+<xs:element name="message" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="Test">
+<xs:sequence>
+<xs:element name="t" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="TestResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetReadyAnswer">
+<xs:sequence>
+<xs:element name="req" type="xs:string" minOccurs="0"/>
+</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="GetReadyAnswerResponse">
+<xs:sequence>
+<xs:element name="return" type="xs:boolean"/>
+</xs:sequence>
+</xs:complexType>
+</xs:schema>

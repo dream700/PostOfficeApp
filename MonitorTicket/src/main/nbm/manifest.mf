@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+OpenIDE-Module-Localizing-Bundle: ru/russianpost/siberia/monitorticket/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
+OpenIDE-Module-Requires: org.openide.windows.IOProvider
+OpenIDE-Module-Module-Dependencies: org.openide.windows
+OpenIDE-Module-Module-Dependencies: org.openide.io

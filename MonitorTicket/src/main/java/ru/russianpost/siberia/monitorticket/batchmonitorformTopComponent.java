@@ -12,9 +12,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -214,7 +216,6 @@ public final class batchmonitorformTopComponent extends TopComponent {
     private void initComponents() {
 
         btFileLoad = new javax.swing.JButton();
-        btLoadAnswer = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         InfoTrace = new javax.swing.JTextArea();
 
@@ -224,15 +225,6 @@ public final class batchmonitorformTopComponent extends TopComponent {
         btFileLoad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btFileLoadActionPerformed(evt);
-            }
-        });
-
-        org.openide.awt.Mnemonics.setLocalizedText(btLoadAnswer, org.openide.util.NbBundle.getMessage(batchmonitorformTopComponent.class, "batchmonitorformTopComponent.btLoadAnswer.text")); // NOI18N
-        btLoadAnswer.setToolTipText(org.openide.util.NbBundle.getMessage(batchmonitorformTopComponent.class, "batchmonitorformTopComponent.btLoadAnswer.toolTipText")); // NOI18N
-        btLoadAnswer.setEnabled(false);
-        btLoadAnswer.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btLoadAnswerActionPerformed(evt);
             }
         });
 
@@ -246,9 +238,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btFileLoad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btLoadAnswer, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(btFileLoad)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 374, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(18, Short.MAX_VALUE))
@@ -259,10 +249,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
                 .addGap(16, 16, 16)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btFileLoad)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btLoadAnswer)))
+                    .addComponent(btFileLoad))
                 .addContainerGap(153, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -302,15 +289,15 @@ public final class batchmonitorformTopComponent extends TopComponent {
 
         @Override
         protected void done() {
-            btLoadAnswer.setText("Получить");
-            btLoadAnswer.setEnabled(true);
             InfoTrace.append("Ok!\n");
+            GetAnswerServer(lines);
+            lines.clear();
+            btFileLoad.setEnabled(true);
         }
 
         @Override
         protected void process(List<String> chunks) {
             for (String chunk : chunks) {
-                btLoadAnswer.setText(String.valueOf(System.currentTimeMillis() - start));
                 InfoTrace.append(chunk);
             }
         }
@@ -350,17 +337,9 @@ public final class batchmonitorformTopComponent extends TopComponent {
         util.changeCursorWaitStatus(false);
     }//GEN-LAST:event_btFileLoadActionPerformed
 
-    private void btLoadAnswerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btLoadAnswerActionPerformed
-        GetAnswerServer(lines);
-        btFileLoad.setEnabled(true);
-        btLoadAnswer.setEnabled(false);
-        lines.clear();
-    }//GEN-LAST:event_btLoadAnswerActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea InfoTrace;
     private javax.swing.JButton btFileLoad;
-    private javax.swing.JButton btLoadAnswer;
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
     @Override
@@ -405,62 +384,67 @@ public final class batchmonitorformTopComponent extends TopComponent {
     Получаем данные с сервера
      */
     private void GetAnswerServer(List<String> lines) {
-        File saveFile = GetFileRequest(true, new FileNameExtensionFilter("XLS Files", "xls"));
+        String[] filename = reqfile.getName().split(Pattern.quote("."));
+        if ("xls".equals(filename[1])) {
+            filename[0] = filename[0] + "$";
+        }
+        String sfile = filename[0] + ".xls";
+        File saveFile = new File(reqfile.getAbsolutePath()
+                    .substring(0, reqfile.getAbsolutePath().lastIndexOf(
+                                    File.separator))+File.separator+sfile);
         InfoTrace.append("Выгружаем в файл " + saveFile.getName() + "\n");
-        if (saveFile != null) {
-            class Task implements Runnable {
+        class Task implements Runnable {
 
-                List<String> lines;
-                File saveFile;
+            List<String> lines;
+            File saveFile;
 
-                Task(File f, List<String> l) {
-                    saveFile = f;
-                    lines = new ArrayList<>();
-                    lines.addAll(l);
-                }
+            Task(File f, List<String> l) {
+                saveFile = f;
+                lines = new ArrayList<>();
+                lines.addAll(l);
+            }
 
-                public void run() {
-                    ProgressHandle p = ProgressHandle.createHandle("Загрузка ШПИ с сервера");
-                    p.start(lines.size());
-                    // создание самого excel файла в памяти
-                    HSSFWorkbook workbook = new HSSFWorkbook();
-                    // создание листа с названием "Просто лист"
-                    HSSFSheet sheet = workbook.createSheet("ШПИ");
-                    // счетчик для строк
-                    int rowNum = 0;
-                    // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
-                    Row row = sheet.createRow(rowNum);
-                    row.createCell(0).setCellValue("ШПИ");
-                    row.createCell(1).setCellValue("Дата");
-                    row.createCell(2).setCellValue("Финал");
-                    ViewHistorySERV_Service service = new ViewHistorySERV_Service();
-                    ViewHistorySERV port = service.getViewHistorySERVPort();
-                    FindTicket parameters = new FindTicket();
-                    int i = 1;
-                    for (String line : lines) {
-                        try { // Call Web Service Operation
-                            parameters.setBarcode(line);
-                            FindTicketResponse tk = port.findTicket(parameters);
-                            if (tk != null) {
-                                rowNum = createSheetHeader(sheet, ++rowNum, tk.getReturn());
-                            }
-                        } catch (Exception ex) {
-                            util.LogErr(ex.getMessage());
+            public void run() {
+                ProgressHandle p = ProgressHandle.createHandle("Загрузка ШПИ с сервера");
+                p.start(lines.size());
+                // создание самого excel файла в памяти
+                HSSFWorkbook workbook = new HSSFWorkbook();
+                // создание листа с названием "Просто лист"
+                HSSFSheet sheet = workbook.createSheet("ШПИ");
+                // счетчик для строк
+                int rowNum = 0;
+                // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
+                Row row = sheet.createRow(rowNum);
+                row.createCell(0).setCellValue("ШПИ");
+                row.createCell(1).setCellValue("Дата");
+                row.createCell(2).setCellValue("Финал");
+                ViewHistorySERV_Service service = new ViewHistorySERV_Service();
+                ViewHistorySERV port = service.getViewHistorySERVPort();
+                FindTicket parameters = new FindTicket();
+                int i = 1;
+                for (String line : lines) {
+                    try { // Call Web Service Operation
+                        parameters.setBarcode(line);
+                        FindTicketResponse tk = port.findTicket(parameters);
+                        if (tk != null) {
+                            rowNum = createSheetHeader(sheet, ++rowNum, tk.getReturn());
                         }
-                        p.progress(i++);
-                    }
-                    // записываем созданный в памяти Excel документ в файл
-                    try (FileOutputStream f = new FileOutputStream(saveFile)) {
-                        workbook.write(f);
-                    } catch (IOException ex) {
+                    } catch (Exception ex) {
                         util.LogErr(ex.getMessage());
                     }
-                    p.finish();
-                    lines.clear();
+                    p.progress(i++);
                 }
-            };
-            Thread t = new Thread(new Task(saveFile, lines));
-            t.start();
-        }
+                // записываем созданный в памяти Excel документ в файл
+                try (FileOutputStream f = new FileOutputStream(saveFile)) {
+                    workbook.write(f);
+                } catch (IOException ex) {
+                    util.LogErr(ex.getMessage());
+                }
+                p.finish();
+                lines.clear();
+            }
+        };
+        Thread t = new Thread(new Task(saveFile, lines));
+        t.start();
     }
 }

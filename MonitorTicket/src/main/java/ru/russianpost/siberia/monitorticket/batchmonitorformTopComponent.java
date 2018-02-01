@@ -9,19 +9,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 import javax.swing.JFileChooser;
 import javax.swing.SwingWorker;
@@ -218,6 +210,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
         btFileLoad = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         InfoTrace = new javax.swing.JTextArea();
+        btLocal = new javax.swing.JButton();
 
         setNextFocusableComponent(btFileLoad);
 
@@ -232,16 +225,25 @@ public final class batchmonitorformTopComponent extends TopComponent {
         InfoTrace.setRows(5);
         jScrollPane2.setViewportView(InfoTrace);
 
+        org.openide.awt.Mnemonics.setLocalizedText(btLocal, org.openide.util.NbBundle.getMessage(batchmonitorformTopComponent.class, "batchmonitorformTopComponent.btLocal.text")); // NOI18N
+        btLocal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btLocalActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addComponent(btFileLoad)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btFileLoad)
+                    .addComponent(btLocal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 374, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addGap(18, 18, 18))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -249,7 +251,10 @@ public final class batchmonitorformTopComponent extends TopComponent {
                 .addGap(16, 16, 16)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btFileLoad))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btFileLoad)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btLocal)))
                 .addContainerGap(153, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -293,6 +298,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
             GetAnswerServer(lines);
             lines.clear();
             btFileLoad.setEnabled(true);
+            btLocal.setEnabled(true);
         }
 
         @Override
@@ -307,6 +313,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
     private void btFileLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btFileLoadActionPerformed
         util.changeCursorWaitStatus(true);
         btFileLoad.setEnabled(false);
+        btLocal.setEnabled(false);
         if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CVS & XLS Files", "txt", "cvs", "xls"))) != null) {
             try {
                 String filename = reqfile.getName().toLowerCase();
@@ -322,6 +329,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
                 } else {
                     InfoTrace.append("Формат не определен\n");
                     InfoTrace.append("Завершено\n");
+                    btLocal.setEnabled(true);
                     btFileLoad.setEnabled(true);
                 }
                 if (lines.size() > 0) {
@@ -337,9 +345,46 @@ public final class batchmonitorformTopComponent extends TopComponent {
         util.changeCursorWaitStatus(false);
     }//GEN-LAST:event_btFileLoadActionPerformed
 
+    private void btLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btLocalActionPerformed
+        if (btFileLoad.isEnabled()) {
+            btFileLoad.setEnabled(false);
+            btLocal.setEnabled(false);
+            if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CVS & XLS Files", "txt", "cvs", "xls"))) != null) {
+                try {
+                    util.changeCursorWaitStatus(true);
+                    String filename = reqfile.getName().toLowerCase();
+                    InfoTrace.append("Загружаем фйал с ШПИ: " + filename + "\n");
+                    util.LogDebug("File name - " + filename);
+                    lines.clear();
+                    if ((filename.indexOf("txt") > 0) | (filename.indexOf("cvs") > 0)) {
+                        InfoTrace.append("Определен текстовый формат\n");
+                        lines = readFromFileTickets(lines, reqfile);
+                    } else if (filename.indexOf("xls") > 0) {
+                        InfoTrace.append("Определен excel формат\n");
+                        lines = readFromExcelTickets(lines, reqfile);
+                    } else {
+                        InfoTrace.append("Формат не определен\n");
+                        InfoTrace.append("Завершено\n");
+                        btFileLoad.setEnabled(true);
+                        btLocal.setEnabled(true);
+                    }
+                    if (lines.size() > 0) {
+                        GetAnswerServer(lines);
+                        btFileLoad.setEnabled(true);
+                        btLocal.setEnabled(true);
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+            util.changeCursorWaitStatus(false);
+        }
+    }//GEN-LAST:event_btLocalActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea InfoTrace;
     private javax.swing.JButton btFileLoad;
+    private javax.swing.JButton btLocal;
     private javax.swing.JScrollPane jScrollPane2;
     // End of variables declaration//GEN-END:variables
     @Override
@@ -390,8 +435,8 @@ public final class batchmonitorformTopComponent extends TopComponent {
         }
         String sfile = filename[0] + ".xls";
         File saveFile = new File(reqfile.getAbsolutePath()
-                    .substring(0, reqfile.getAbsolutePath().lastIndexOf(
-                                    File.separator))+File.separator+sfile);
+                .substring(0, reqfile.getAbsolutePath().lastIndexOf(
+                        File.separator)) + File.separator + sfile);
         InfoTrace.append("Выгружаем в файл " + saveFile.getName() + "\n");
         class Task implements Runnable {
 

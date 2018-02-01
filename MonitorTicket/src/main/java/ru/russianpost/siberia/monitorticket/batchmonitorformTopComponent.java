@@ -207,12 +207,19 @@ public final class batchmonitorformTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        btLocal = new javax.swing.JButton();
         btFileLoad = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         InfoTrace = new javax.swing.JTextArea();
-        btLocal = new javax.swing.JButton();
 
         setNextFocusableComponent(btFileLoad);
+
+        org.openide.awt.Mnemonics.setLocalizedText(btLocal, org.openide.util.NbBundle.getMessage(batchmonitorformTopComponent.class, "batchmonitorformTopComponent.btLocal.text")); // NOI18N
+        btLocal.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btLocalActionPerformed(evt);
+            }
+        });
 
         org.openide.awt.Mnemonics.setLocalizedText(btFileLoad, org.openide.util.NbBundle.getMessage(batchmonitorformTopComponent.class, "batchmonitorformTopComponent.btFileLoad.text")); // NOI18N
         btFileLoad.addActionListener(new java.awt.event.ActionListener() {
@@ -225,13 +232,6 @@ public final class batchmonitorformTopComponent extends TopComponent {
         InfoTrace.setRows(5);
         jScrollPane2.setViewportView(InfoTrace);
 
-        org.openide.awt.Mnemonics.setLocalizedText(btLocal, org.openide.util.NbBundle.getMessage(batchmonitorformTopComponent.class, "batchmonitorformTopComponent.btLocal.text")); // NOI18N
-        btLocal.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btLocalActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -240,22 +240,23 @@ public final class batchmonitorformTopComponent extends TopComponent {
                 .addGap(19, 19, 19)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btFileLoad)
-                    .addComponent(btLocal, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btLocal))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 374, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18))
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(16, 16, 16)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(btFileLoad)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btLocal)))
-                .addContainerGap(153, Short.MAX_VALUE))
+                        .addGap(16, 16, 16)
+                        .addComponent(btLocal)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -311,10 +312,10 @@ public final class batchmonitorformTopComponent extends TopComponent {
     }
 
     private void btFileLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btFileLoadActionPerformed
-        util.changeCursorWaitStatus(true);
         btFileLoad.setEnabled(false);
         btLocal.setEnabled(false);
         if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CVS & XLS Files", "txt", "cvs", "xls"))) != null) {
+            util.changeCursorWaitStatus(true);
             try {
                 String filename = reqfile.getName().toLowerCase();
                 InfoTrace.append("Загружаем фйал с ШПИ: " + filename + "\n");
@@ -341,8 +342,11 @@ public final class batchmonitorformTopComponent extends TopComponent {
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }
+            util.changeCursorWaitStatus(false);
+        } else {
+            btFileLoad.setEnabled(true);
+            btLocal.setEnabled(true);
         }
-        util.changeCursorWaitStatus(false);
     }//GEN-LAST:event_btFileLoadActionPerformed
 
     private void btLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btLocalActionPerformed
@@ -350,8 +354,8 @@ public final class batchmonitorformTopComponent extends TopComponent {
             btFileLoad.setEnabled(false);
             btLocal.setEnabled(false);
             if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CVS & XLS Files", "txt", "cvs", "xls"))) != null) {
+                util.changeCursorWaitStatus(true);
                 try {
-                    util.changeCursorWaitStatus(true);
                     String filename = reqfile.getName().toLowerCase();
                     InfoTrace.append("Загружаем фйал с ШПИ: " + filename + "\n");
                     util.LogDebug("File name - " + filename);
@@ -368,16 +372,21 @@ public final class batchmonitorformTopComponent extends TopComponent {
                         btFileLoad.setEnabled(true);
                         btLocal.setEnabled(true);
                     }
+                    InfoTrace.append("Загружаем из БД " + String.valueOf(lines.size()) + " ШПИ\n");
                     if (lines.size() > 0) {
                         GetAnswerServer(lines);
+                        InfoTrace.append("Готово!\n");
                         btFileLoad.setEnabled(true);
                         btLocal.setEnabled(true);
                     }
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                 }
+                util.changeCursorWaitStatus(false);
+            } else {
+                btFileLoad.setEnabled(true);
+                btLocal.setEnabled(true);
             }
-            util.changeCursorWaitStatus(false);
         }
     }//GEN-LAST:event_btLocalActionPerformed
 
@@ -449,6 +458,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
                 lines.addAll(l);
             }
 
+            @Override
             public void run() {
                 ProgressHandle p = ProgressHandle.createHandle("Загрузка ШПИ с сервера");
                 p.start(lines.size());

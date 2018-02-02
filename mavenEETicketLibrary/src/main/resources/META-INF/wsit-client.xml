@@ -7,4 +7,5 @@
  >
     <import location="GetBatchTicketSRV.xml" namespace="http://siberia.russianpost.ru/"/>
     <import location="ViewHistorySERV.xml" namespace="http://siberia.russianpost.ru/"/>
+    <import location="GetTicketSessionSRV.xml" namespace="http://siberia.russianpost.ru/"/>
 </definitions>

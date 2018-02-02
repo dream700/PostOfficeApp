@@ -19,8 +19,6 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -28,6 +26,8 @@ import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -35,6 +35,11 @@ import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
+import ru.russianpost.siberia.GetTicket;
+import ru.russianpost.siberia.GetTicketResponse;
+import ru.russianpost.siberia.GetTicketSessionSRV;
+import ru.russianpost.siberia.GetTicketSessionSRV_Service;
+import ru.russianpost.siberia.Viewhistory;
 import ru.russianpost.siberia.maveneeticketlibrary.api.FindTicket;
 import ru.russianpost.siberia.maveneeticketlibrary.api.FindTicketResponse;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTicketSRV;
@@ -100,7 +105,6 @@ public final class batchmonitorformTopComponent extends TopComponent {
                     validateTicketFormat(lines, data[0]);
                 }
             }
-//            lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
             util.LogDebug("Read - " + String.valueOf(lines.size()) + " barcode");
         } catch (IOException ex) {
             util.LogErr(ex.getMessage());
@@ -118,7 +122,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
     // заполнение строки (rowNum) определенного листа (sheet)
     // данными  из dataModel созданного в памяти Excel файла
 
-    private int createSheetHeader(HSSFSheet sheet, int rowNum, Ticket t) {
+    private int createSheetHeader(XSSFSheet sheet, int rowNum, Ticket t) {
         Row row = sheet.createRow(rowNum);
         row.createCell(0).setCellValue(t.getBarcode());
         row.createCell(1).setCellValue(t.getDateFetch().toString());
@@ -126,12 +130,28 @@ public final class batchmonitorformTopComponent extends TopComponent {
         for (Historyrecord h : t.getHistoryrecord()) {
             Row r = sheet.createRow(++rowNum);
             r.createCell(1).setCellValue(h.getOperationAddressIndex());
-            r.createCell(2).setCellValue(h.getOperDate().toString());
-            r.createCell(3).setCellValue(h.getOperTypeID());
-            r.createCell(4).setCellValue(h.getOperTypeName());
-            r.createCell(5).setCellValue(h.getOperAttrID());
-            r.createCell(6).setCellValue(h.getOperAttrName());
-            r.createCell(7).setCellValue(h.getOperatonDelta());
+            r.createCell(2).setCellValue(h.getDestinationAddressIndex());
+            r.createCell(3).setCellValue(h.getOperDate().toString());
+            r.createCell(4).setCellValue(h.getOperTypeID());
+            r.createCell(5).setCellValue(h.getOperTypeName());
+            r.createCell(6).setCellValue(h.getOperAttrID());
+            r.createCell(7).setCellValue(h.getOperAttrName());
+            r.createCell(8).setCellValue(h.getOperatonDelta());
+        }
+        return rowNum;
+    }
+
+    private int createSheetHeaderDetail(XSSFSheet sheet, int rowNum, List<Viewhistory> t) {
+        for (Viewhistory h : t) {
+            Row r = sheet.createRow(++rowNum);
+            r.createCell(0).setCellValue(h.getBarcode());
+            r.createCell(1).setCellValue(h.getOperationaddressIndex());
+            r.createCell(2).setCellValue(h.getDestinationaddressIndex());
+            r.createCell(3).setCellValue(h.getOperdate().toString());
+            r.createCell(4).setCellValue(h.getOpertypeid());
+            r.createCell(5).setCellValue(h.getNameattr());
+            r.createCell(6).setCellValue(h.getNametype());
+            r.createCell(8).setCellValue(h.getOperatondelta());
         }
         return rowNum;
     }
@@ -211,6 +231,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
         btFileLoad = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         InfoTrace = new javax.swing.JTextArea();
+        btDetail = new javax.swing.JButton();
 
         setNextFocusableComponent(btFileLoad);
 
@@ -232,17 +253,25 @@ public final class batchmonitorformTopComponent extends TopComponent {
         InfoTrace.setRows(5);
         jScrollPane2.setViewportView(InfoTrace);
 
+        org.openide.awt.Mnemonics.setLocalizedText(btDetail, org.openide.util.NbBundle.getMessage(batchmonitorformTopComponent.class, "batchmonitorformTopComponent.btDetail.text")); // NOI18N
+        btDetail.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btDetailActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btFileLoad)
-                    .addComponent(btLocal))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(btDetail, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btLocal, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btFileLoad, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 405, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 399, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -255,10 +284,18 @@ public final class batchmonitorformTopComponent extends TopComponent {
                         .addComponent(btFileLoad)
                         .addGap(16, 16, 16)
                         .addComponent(btLocal)
+                        .addGap(18, 18, 18)
+                        .addComponent(btDetail)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void SetButtom(boolean b) {
+        btFileLoad.setEnabled(b);
+        btLocal.setEnabled(b);
+        btDetail.setEnabled(b);
+    }
 
     private class WaittoAnswer extends SwingWorker<Void, String> {
 
@@ -300,6 +337,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
             lines.clear();
             btFileLoad.setEnabled(true);
             btLocal.setEnabled(true);
+            btDetail.setEnabled(true);
         }
 
         @Override
@@ -312,16 +350,15 @@ public final class batchmonitorformTopComponent extends TopComponent {
     }
 
     private void btFileLoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btFileLoadActionPerformed
-        btFileLoad.setEnabled(false);
-        btLocal.setEnabled(false);
-        if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CVS & XLS Files", "txt", "cvs", "xls"))) != null) {
+        SetButtom(false);
+        if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CSV & XLS Files", "txt", "csv", "xls", "xlsx"))) != null) {
             util.changeCursorWaitStatus(true);
             try {
                 String filename = reqfile.getName().toLowerCase();
                 InfoTrace.append("Загружаем фйал с ШПИ: " + filename + "\n");
                 util.LogDebug("File name - " + filename);
                 lines.clear();
-                if ((filename.indexOf("txt") > 0) | (filename.indexOf("cvs") > 0)) {
+                if ((filename.indexOf("txt") > 0) | (filename.indexOf("csv") > 0)) {
                     InfoTrace.append("Определен текстовый формат\n");
                     lines = readFromFileTickets(lines, reqfile);
                 } else if (filename.indexOf("xls") > 0) {
@@ -330,8 +367,7 @@ public final class batchmonitorformTopComponent extends TopComponent {
                 } else {
                     InfoTrace.append("Формат не определен\n");
                     InfoTrace.append("Завершено\n");
-                    btLocal.setEnabled(true);
-                    btFileLoad.setEnabled(true);
+                    SetButtom(true);
                 }
                 if (lines.size() > 0) {
                     List<String> request = GetBatchTicketService(lines);
@@ -344,23 +380,21 @@ public final class batchmonitorformTopComponent extends TopComponent {
             }
             util.changeCursorWaitStatus(false);
         } else {
-            btFileLoad.setEnabled(true);
-            btLocal.setEnabled(true);
+            SetButtom(true);
         }
     }//GEN-LAST:event_btFileLoadActionPerformed
 
     private void btLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btLocalActionPerformed
         if (btFileLoad.isEnabled()) {
-            btFileLoad.setEnabled(false);
-            btLocal.setEnabled(false);
-            if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CVS & XLS Files", "txt", "cvs", "xls"))) != null) {
+            SetButtom(false);
+            if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CSV & XLS Files", "txt", "csv", "xls", "xlsx"))) != null) {
                 util.changeCursorWaitStatus(true);
                 try {
                     String filename = reqfile.getName().toLowerCase();
                     InfoTrace.append("Загружаем фйал с ШПИ: " + filename + "\n");
                     util.LogDebug("File name - " + filename);
                     lines.clear();
-                    if ((filename.indexOf("txt") > 0) | (filename.indexOf("cvs") > 0)) {
+                    if ((filename.indexOf("txt") > 0) | (filename.indexOf("csv") > 0)) {
                         InfoTrace.append("Определен текстовый формат\n");
                         lines = readFromFileTickets(lines, reqfile);
                     } else if (filename.indexOf("xls") > 0) {
@@ -369,29 +403,64 @@ public final class batchmonitorformTopComponent extends TopComponent {
                     } else {
                         InfoTrace.append("Формат не определен\n");
                         InfoTrace.append("Завершено\n");
-                        btFileLoad.setEnabled(true);
-                        btLocal.setEnabled(true);
+                        SetButtom(true);
                     }
                     InfoTrace.append("Загружаем из БД " + String.valueOf(lines.size()) + " ШПИ\n");
                     if (lines.size() > 0) {
                         GetAnswerServer(lines);
                         InfoTrace.append("Готово!\n");
-                        btFileLoad.setEnabled(true);
-                        btLocal.setEnabled(true);
+                        SetButtom(true);
                     }
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                 }
                 util.changeCursorWaitStatus(false);
             } else {
-                btFileLoad.setEnabled(true);
-                btLocal.setEnabled(true);
+                SetButtom(true);
             }
         }
     }//GEN-LAST:event_btLocalActionPerformed
 
+    private void btDetailActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btDetailActionPerformed
+        if (btFileLoad.isEnabled()) {
+            SetButtom(false);
+            if ((reqfile = GetFileRequest(false, new FileNameExtensionFilter("TXT & CSV & XLS Files", "txt", "csv", "xls", "xlsx"))) != null) {
+                util.changeCursorWaitStatus(true);
+                try {
+                    String filename = reqfile.getName().toLowerCase();
+                    InfoTrace.append("Загружаем фйал с ШПИ: " + filename + "\n");
+                    util.LogDebug("File name - " + filename);
+                    lines.clear();
+                    if ((filename.indexOf("txt") > 0) | (filename.indexOf("csv") > 0)) {
+                        InfoTrace.append("Определен текстовый формат\n");
+                        lines = readFromFileTickets(lines, reqfile);
+                    } else if (filename.indexOf("xls") > 0) {
+                        InfoTrace.append("Определен excel формат\n");
+                        lines = readFromExcelTickets(lines, reqfile);
+                    } else {
+                        InfoTrace.append("Формат не определен\n");
+                        InfoTrace.append("Завершено\n");
+                        SetButtom(true);
+                    }
+                    InfoTrace.append("Загружаем из БД " + String.valueOf(lines.size()) + " ШПИ\n");
+                    if (lines.size() > 0) {
+                        GetAnswerServerDetail(lines);
+                        InfoTrace.append("Готово!\n");
+                        SetButtom(true);
+                    }
+                } catch (Exception ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+                util.changeCursorWaitStatus(false);
+            } else {
+                SetButtom(true);
+            }
+        }
+    }//GEN-LAST:event_btDetailActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextArea InfoTrace;
+    private javax.swing.JButton btDetail;
     private javax.swing.JButton btFileLoad;
     private javax.swing.JButton btLocal;
     private javax.swing.JScrollPane jScrollPane2;
@@ -439,10 +508,10 @@ public final class batchmonitorformTopComponent extends TopComponent {
      */
     private void GetAnswerServer(List<String> lines) {
         String[] filename = reqfile.getName().split(Pattern.quote("."));
-        if ("xls".equals(filename[1])) {
+        if ("xlsx".equals(filename[1])) {
             filename[0] = filename[0] + "$";
         }
-        String sfile = filename[0] + ".xls";
+        String sfile = filename[0] + ".xlsx";
         File saveFile = new File(reqfile.getAbsolutePath()
                 .substring(0, reqfile.getAbsolutePath().lastIndexOf(
                         File.separator)) + File.separator + sfile);
@@ -463,9 +532,9 @@ public final class batchmonitorformTopComponent extends TopComponent {
                 ProgressHandle p = ProgressHandle.createHandle("Загрузка ШПИ с сервера");
                 p.start(lines.size());
                 // создание самого excel файла в памяти
-                HSSFWorkbook workbook = new HSSFWorkbook();
+                XSSFWorkbook workbook = new XSSFWorkbook();
                 // создание листа с названием "Просто лист"
-                HSSFSheet sheet = workbook.createSheet("ШПИ");
+                XSSFSheet sheet = workbook.createSheet("ШПИ");
                 // счетчик для строк
                 int rowNum = 0;
                 // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
@@ -483,6 +552,75 @@ public final class batchmonitorformTopComponent extends TopComponent {
                         FindTicketResponse tk = port.findTicket(parameters);
                         if (tk != null) {
                             rowNum = createSheetHeader(sheet, ++rowNum, tk.getReturn());
+                        }
+                    } catch (Exception ex) {
+                        util.LogErr(ex.getMessage());
+                    }
+                    p.progress(i++);
+                }
+                // записываем созданный в памяти Excel документ в файл
+                try (FileOutputStream f = new FileOutputStream(saveFile)) {
+                    workbook.write(f);
+                } catch (IOException ex) {
+                    util.LogErr(ex.getMessage());
+                }
+                p.finish();
+                lines.clear();
+            }
+        }
+        Thread t = new Thread(new Task(saveFile, lines));
+        t.start();
+    }
+
+    /*
+    Получаем данные с сервера
+     */
+    private void GetAnswerServerDetail(List<String> lines) {
+        String[] filename = reqfile.getName().split(Pattern.quote("."));
+        if ("xlsx".equals(filename[1])) {
+            filename[0] = filename[0] + "$";
+        }
+        String sfile = filename[0] + ".xlsx";
+        File saveFile = new File(reqfile.getAbsolutePath()
+                .substring(0, reqfile.getAbsolutePath().lastIndexOf(
+                        File.separator)) + File.separator + sfile);
+        InfoTrace.append("Выгружаем в файл " + saveFile.getName() + "\n");
+        class Task implements Runnable {
+
+            List<String> lines;
+            File saveFile;
+
+            Task(File f, List<String> l) {
+                saveFile = f;
+                lines = new ArrayList<>();
+                lines.addAll(l);
+            }
+
+            @Override
+            public void run() {
+                ProgressHandle p = ProgressHandle.createHandle("Загрузка ШПИ с сервера");
+                p.start(lines.size());
+                // создание самого excel файла в памяти
+                XSSFWorkbook workbook = new XSSFWorkbook();
+                // создание листа с названием "Просто лист"
+                XSSFSheet sheet = workbook.createSheet("ШПИ");
+                // счетчик для строк
+                int rowNum = 0;
+                // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
+                Row row = sheet.createRow(rowNum);
+                row.createCell(0).setCellValue("ШПИ");
+                row.createCell(1).setCellValue("Дата");
+                row.createCell(2).setCellValue("Финал");
+                GetTicketSessionSRV_Service service = new GetTicketSessionSRV_Service();
+                GetTicketSessionSRV port = service.getGetTicketSessionSRVPort();
+                GetTicket parameters = new GetTicket();
+                int i = 1;
+                for (String line : lines) {
+                    try { // Call Web Service Operation
+                        parameters.setBarcode(line);
+                        GetTicketResponse tk = port.getTicket(parameters);
+                        if (tk != null) {
+                            rowNum = createSheetHeaderDetail(sheet, ++rowNum, tk.getReturn());
                         }
                     } catch (Exception ex) {
                         util.LogErr(ex.getMessage());

@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
-import ru.russianpost.siberia.maveneeticketlibrary.api.Viewhistory;
+import ru.russianpost.siberia.Viewhistory;
 
 /**
  *
@@ -23,10 +23,10 @@ public class ViewhistoryModel extends AbstractTableModel {
 
     private final List<Viewhistory> viewhostory;
     private final String[] columnNames = new String[]{
-        "Индекс", "Дата", "Тип операции", "Операция", "Часов"
+        "Индекс", "Индекс назн.", "Дата", "Тип операции", "Операция", "Часов"
     };
     private final Class[] columnClass = new Class[]{
-        String.class, Date.class, String.class, String.class, Integer.class
+        String.class, String.class, Date.class, String.class, String.class, Integer.class
     };
 
     public ViewhistoryModel(List<Viewhistory> viewhostory) {
@@ -72,12 +72,14 @@ public class ViewhistoryModel extends AbstractTableModel {
             case 0:
                 return row.getOperationaddressIndex();
             case 1:
-                return getOperDate(row.getOperdate().toString());
+                return row.getDestinationaddressIndex();
             case 2:
-                return row.getNametype();
+                return getOperDate(row.getOperdate().toString());
             case 3:
-                return row.getNameattr();
+                return row.getNametype();
             case 4:
+                return row.getNameattr();
+            case 5:
                 return row.getOperatondelta() / 60;
             default:
                 break;

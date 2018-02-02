@@ -12,6 +12,10 @@ import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
+import ru.russianpost.siberia.GetTicket;
+import ru.russianpost.siberia.GetTicketResponse;
+import ru.russianpost.siberia.GetTicketSessionSRV;
+import ru.russianpost.siberia.GetTicketSessionSRV_Service;
 import ru.russianpost.siberia.maveneeticketlibrary.api.FindBarcode;
 import ru.russianpost.siberia.maveneeticketlibrary.api.FindBarcodeResponse;
 import ru.russianpost.siberia.maveneeticketlibrary.api.ViewHistorySERV;
@@ -120,8 +124,8 @@ public final class SearchTicketTopComponent extends TopComponent {
                     .addComponent(edBarcode, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btGetTicket))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(58, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 184, Short.MAX_VALUE)
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -132,11 +136,11 @@ public final class SearchTicketTopComponent extends TopComponent {
     private void btGetTicketActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btGetTicketActionPerformed
         util.changeCursorWaitStatus(true);
         try {
-            ViewHistorySERV_Service service = new ViewHistorySERV_Service();
-            ViewHistorySERV port = service.getViewHistorySERVPort();
-            FindBarcode parameters = new FindBarcode();
+            GetTicketSessionSRV_Service service = new GetTicketSessionSRV_Service();
+            GetTicketSessionSRV port = service.getGetTicketSessionSRVPort();
+            GetTicket parameters = new GetTicket();
             parameters.setBarcode(edBarcode.getText().toUpperCase());
-            FindBarcodeResponse result = port.findBarcode(parameters);
+            GetTicketResponse result = port.getTicket(parameters);
             ViewhistoryModel tm = new ViewhistoryModel(result.getReturn());
             jTable.setModel(tm);
             tm.fireTableDataChanged();

@@ -64,6 +64,24 @@
                         <id>wsimport-generate-ViewHistorySERV</id>
                         <phase>generate-sources</phase>
                     </execution>
+                    <execution>
+                        <goals>
+                            <goal>wsimport</goal>
+                        </goals>
+                        <configuration>
+                            <wsdlFiles>
+                                <wsdlFile>GetTicketSessionSRV.wsdl</wsdlFile>
+                            </wsdlFiles>
+                            <packageName></packageName>
+                            <vmArgs>
+                                <vmArg>-Djavax.xml.accessExternalSchema=all</vmArg>
+                            </vmArgs>
+                            <wsdlLocation>file:/C:/Users/Andrey.Isakov/AppData/Roaming/NetBeans/8.2/config/WebServices/GetTicketSessionSRV/catalog/r54oth01_8080/GetTicketSessionSRV/GetTicketSessionSRV.wsdl</wsdlLocation>
+                            <staleFile>${project.build.directory}/jaxws/stale/GetTicketSessionSRV.stale</staleFile>
+                        </configuration>
+                        <id>wsimport-generate-GetTicketSessionSRV</id>
+                        <phase>generate-sources</phase>
+                    </execution>
                 </executions>
                 <dependencies>
                     <dependency>

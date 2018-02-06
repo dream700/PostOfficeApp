@@ -97,13 +97,15 @@ public final class FactoryService {
     protected List<String> readFromFileTickets(List<String> lines, File file) {
         BufferedReader br = null;
         String line;
-        String cvsSplitBy = "|";
+        String cvsSplitBy = ";";
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             while ((line = br.readLine()) != null) {
                 if (!validateTicketFormat(lines, line)) {
                     String[] data = line.split(Pattern.quote(cvsSplitBy));
-                    validateTicketFormat(lines, data[0]);
+                    for (String string : data) {
+                        validateTicketFormat(lines, string);
+                    }
                 }
             }
             util.LogDebug("Read - " + String.valueOf(lines.size()) + " barcode");
@@ -137,6 +139,7 @@ public final class FactoryService {
     }
 
     private boolean validateTicketFormat(List<String> lines, String barcode) {
+        barcode=barcode.replace("\"", "");
         if ((barcode.length() == 14) || (barcode.length() == 13)) {
             lines.add(barcode.toUpperCase());
             return true;
@@ -287,6 +290,9 @@ public final class FactoryService {
                                 addlog("Готово!\n");
                                 SetButtom(true);
                         }
+                    } else {
+                        addlog("Запрашивать не чего\n");
+                        SetButtom(true);
                     }
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);

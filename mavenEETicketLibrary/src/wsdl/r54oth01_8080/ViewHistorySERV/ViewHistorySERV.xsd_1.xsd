@@ -48,6 +48,20 @@
 <xs:element name="dateFetch" type="xs:dateTime" minOccurs="0"/>
 <xs:element name="historyrecord" type="tns:historyrecord" minOccurs="0" maxOccurs="unbounded"/>
 <xs:element name="isFinal" type="xs:boolean"/>
+<xs:element name="po_version" type="xs:string" minOccurs="0"/>
+<xs:element name="recp_name" type="xs:string" minOccurs="0"/>
+<xs:element name="recp_index" type="xs:string" minOccurs="0"/>
+<xs:element name="recp_region" type="xs:string" minOccurs="0"/>
+<xs:element name="recp_area" type="xs:string" minOccurs="0"/>
+<xs:element name="recp_place" type="xs:string" minOccurs="0"/>
+<xs:element name="recp_street" type="xs:string" minOccurs="0"/>
+<xs:element name="sender_name" type="xs:string" minOccurs="0"/>
+<xs:element name="sender_index" type="xs:string" minOccurs="0"/>
+<xs:element name="sender_region" type="xs:string" minOccurs="0"/>
+<xs:element name="sender_area" type="xs:string" minOccurs="0"/>
+<xs:element name="sender_place" type="xs:string" minOccurs="0"/>
+<xs:element name="sender_street" type="xs:string" minOccurs="0"/>
+<xs:element name="sender_value" type="xs:string" minOccurs="0"/>
 </xs:sequence>
 </xs:complexType>
 
@@ -90,6 +104,7 @@
 <xs:complexType name="viewhistory">
 <xs:sequence>
 <xs:element name="barcode" type="xs:string" minOccurs="0"/>
+<xs:element name="destinationaddressIndex" type="xs:string" minOccurs="0"/>
 <xs:element name="lastoperdate" type="xs:dateTime" minOccurs="0"/>
 <xs:element name="nameattr" type="xs:string" minOccurs="0"/>
 <xs:element name="nametype" type="xs:string" minOccurs="0"/>

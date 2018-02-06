@@ -35,17 +35,17 @@ import ru.russianpost.siberia.GetTicketResponse;
 import ru.russianpost.siberia.GetTicketSessionSRV;
 import ru.russianpost.siberia.GetTicketSessionSRV_Service;
 import ru.russianpost.siberia.Viewhistory;
-import ru.russianpost.siberia.maveneeticketlibrary.api.FindTicket;
-import ru.russianpost.siberia.maveneeticketlibrary.api.FindTicketResponse;
+import ru.russianpost.siberia.FindTicket;
+import ru.russianpost.siberia.FindTicketResponse;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTicketSRV;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTicketSRV_Service;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTickets;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTicketsResponse;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetReadyAnswer;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetReadyAnswerResponse;
-import ru.russianpost.siberia.maveneeticketlibrary.api.Historyrecord;
-import ru.russianpost.siberia.maveneeticketlibrary.api.ViewHistorySERV;
-import ru.russianpost.siberia.maveneeticketlibrary.api.ViewHistorySERV_Service;
+import ru.russianpost.siberia.Historyrecord;
+import ru.russianpost.siberia.ViewHistorySERV;
+import ru.russianpost.siberia.ViewHistorySERV_Service;
 
 /**
  *
@@ -85,10 +85,10 @@ public final class FactoryService {
     private void addlog(String data) {
         funcInfotrace.add(data);
     }
-    
+
     private void SetButtom(boolean b) {
         funcSetButtom.SetButtom(b);
-        isStart = b;
+        isStart = !b;
     }
 
     /*
@@ -97,12 +97,12 @@ public final class FactoryService {
     protected List<String> readFromFileTickets(List<String> lines, File file) {
         BufferedReader br = null;
         String line;
-        String cvsSplitBy = ";";
+        String cvsSplitBy = "[|;]";
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             while ((line = br.readLine()) != null) {
                 if (!validateTicketFormat(lines, line)) {
-                    String[] data = line.split(Pattern.quote(cvsSplitBy));
+                    String[] data = line.replaceAll("\"", "").split(cvsSplitBy);
                     for (String string : data) {
                         validateTicketFormat(lines, string);
                     }
@@ -139,7 +139,7 @@ public final class FactoryService {
     }
 
     private boolean validateTicketFormat(List<String> lines, String barcode) {
-        barcode=barcode.replace("\"", "");
+        barcode = barcode.replace("\"", "");
         if ((barcode.length() == 14) || (barcode.length() == 13)) {
             lines.add(barcode.toUpperCase());
             return true;
@@ -349,7 +349,7 @@ public final class FactoryService {
             // создание листа с названием "Просто лист"
             XSSFSheet sheet = workbook.createSheet("ШПИ");
             // счетчик для строк
-            int rowNum = 0;
+            int rowNum = 1;
             // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
             Row row = sheet.createRow(rowNum);
             row.createCell(0).setCellValue("ШПИ");
@@ -358,15 +358,19 @@ public final class FactoryService {
             ViewHistorySERV_Service service = new ViewHistorySERV_Service();
             ViewHistorySERV port = service.getViewHistorySERVPort();
             FindTicket parameters = new FindTicket();
+            int i = 1;
             for (String line : tasklines) {
                 try { // Call Web Service Operation
-                    parameters.setBarcode(line);
-                    FindTicketResponse tk = port.findTicket(parameters);
+                    Ticket tk = port.findTicket(line);
                     if (tk != null) {
                         Row r1 = sheet.createRow(++rowNum);
                         r1.createCell(0).setCellValue(tk.getReturn().getBarcode());
                         r1.createCell(1).setCellValue(tk.getReturn().getDateFetch().toString());
                         r1.createCell(2).setCellValue(tk.getReturn().isIsFinal());
+                        util.LogDebug(tk.getReturn().getBarcode());
+                        if ("63097717074645".equals(tk.getReturn().getBarcode())) {
+                            i++;
+                        }
                         for (Historyrecord h : tk.getReturn().getHistoryrecord()) {
                             Row r2 = sheet.createRow(++rowNum);
                             r2.createCell(1).setCellValue(h.getOperationAddressIndex());
@@ -383,19 +387,20 @@ public final class FactoryService {
                 } catch (Exception ex) {
                     util.LogErr(ex.getMessage());
                 }
-                p.progress(rowNum);
+                p.progress(i++);
             }
+            p.finish();
             // записываем созданный в памяти Excel документ в файл
             File saveFile = new File(reqfile.getAbsolutePath()
                     .substring(0, reqfile.getAbsolutePath().lastIndexOf(
                             File.separator)) + File.separator + fout);
+            util.LogDebug("Output file name" + saveFile.getName());
             try (FileOutputStream f = new FileOutputStream(saveFile)) {
                 workbook.write(f);
                 f.close();
             } catch (IOException ex) {
                 util.LogErr(ex.getMessage());
             }
-            p.finish();
             return null;
         }
 

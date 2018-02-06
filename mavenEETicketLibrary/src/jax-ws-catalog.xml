@@ -9,8 +9,9 @@
     <system systemId="file:/Users/andy/Library/Application%20Support/NetBeans/8.2/config/WebServices/GetBatchTicketSRV/catalog/r54oth01_8080/GetBatchTicketSRV/GetBatchTicketSRV.wsdl" uri="wsdl/GetBatchTicketSRV.wsdl"/>
     <system systemId="http://r54oth01:8080/GetBatchTicketSRV/GetBatchTicketSRV?xsd=1" uri="wsdl/r54oth01_8080/GetBatchTicketSRV/GetBatchTicketSRV.xsd_1.xsd"/>
     <system systemId="file:/Users/andy/Library/Application%20Support/NetBeans/8.2/config/WebServices/ViewHistorySERV/catalog/r54oth01_8080/ViewHistorySERV/ViewHistorySERV.wsdl" uri="wsdl/ViewHistorySERV.wsdl"/>
-    <system systemId="http://r54oth01:8080/ViewHistorySERV/ViewHistorySERV?xsd=1" uri="wsdl/r54oth01_8080/ViewHistorySERV/ViewHistorySERV.xsd_1.xsd"/>
     <system systemId="http://r54oth01:8080/GetTicketSessionSRV/GetTicketSessionSRV?wdsl" uri="wsdl/r54oth01_8080/GetTicketSessionSRV/GetTicketSessionSRV.wdsl.xml"/>
     <system systemId="file:/C:/Users/Andrey.Isakov/AppData/Roaming/NetBeans/8.2/config/WebServices/GetTicketSessionSRV/catalog/r54oth01_8080/GetTicketSessionSRV/GetTicketSessionSRV.wsdl" uri="wsdl/GetTicketSessionSRV.wsdl"/>
     <system systemId="http://r54oth01:8080/GetTicketSessionSRV/GetTicketSessionSRV?xsd=1" uri="wsdl/r54oth01_8080/GetTicketSessionSRV/GetTicketSessionSRV.xsd_1.xsd"/>
+    <system systemId="file:/C:/Users/Andrey.Isakov/AppData/Roaming/NetBeans/8.2/config/WebServices/ViewHistorySERV/catalog/r54oth01_8080/ViewHistorySERV/ViewHistorySERV.wsdl" uri="wsdl/ViewHistorySERV.wsdl"/>
+    <system systemId="http://r54oth01:8080/ViewHistorySERV/ViewHistorySERV?xsd=1" uri="wsdl/r54oth01_8080/ViewHistorySERV/ViewHistorySERV.xsd_1.xsd"/>
 </catalog>

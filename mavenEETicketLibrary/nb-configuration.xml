@@ -13,7 +13,7 @@ You can copy and paste the single properties, into the pom.xml file and the IDE 
 That way multiple projects can share the same settings (useful for formatting rules for example).
 Any value defined here will override the pom.xml file value but is only applicable to the current project.
 -->
-        <org-netbeans-modules-maven-jaxws._5f_C_5f_ViewHistorySERV>file:/Users/andy/Library/Application%20Support/NetBeans/8.2/config/WebServices/ViewHistorySERV/catalog/r54oth01_8080/ViewHistorySERV/ViewHistorySERV.wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_ViewHistorySERV>
+        <org-netbeans-modules-maven-jaxws._5f_C_5f_ViewHistorySERV>file:/C:/Users/Andrey.Isakov/AppData/Roaming/NetBeans/8.2/config/WebServices/ViewHistorySERV/catalog/r54oth01_8080/ViewHistorySERV/ViewHistorySERV.wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_ViewHistorySERV>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_GetBatchTicketSRV>file:/Users/andy/Library/Application%20Support/NetBeans/8.2/config/WebServices/GetBatchTicketSRV/catalog/r54oth01_8080/GetBatchTicketSRV/GetBatchTicketSRV.wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_GetBatchTicketSRV>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_GetTicketSessionSRV_2e_wdsl>http://r54oth01:8080/GetTicketSessionSRV/GetTicketSessionSRV?wdsl</org-netbeans-modules-maven-jaxws._5f_C_5f_GetTicketSessionSRV_2e_wdsl>
         <org-netbeans-modules-maven-jaxws._5f_C_5f_GetTicketSessionSRV>file:/C:/Users/Andrey.Isakov/AppData/Roaming/NetBeans/8.2/config/WebServices/GetTicketSessionSRV/catalog/r54oth01_8080/GetTicketSessionSRV/GetTicketSessionSRV.wsdl</org-netbeans-modules-maven-jaxws._5f_C_5f_GetTicketSessionSRV>

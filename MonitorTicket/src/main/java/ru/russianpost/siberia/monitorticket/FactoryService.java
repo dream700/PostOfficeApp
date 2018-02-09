@@ -36,7 +36,6 @@ import ru.russianpost.siberia.GetTicketSessionSRV;
 import ru.russianpost.siberia.GetTicketSessionSRV_Service;
 import ru.russianpost.siberia.Viewhistory;
 import ru.russianpost.siberia.FindTicket;
-import ru.russianpost.siberia.FindTicketResponse;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTicketSRV;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTicketSRV_Service;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTickets;
@@ -44,6 +43,7 @@ import ru.russianpost.siberia.maveneeticketlibrary.api.GetBatchTicketsResponse;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetReadyAnswer;
 import ru.russianpost.siberia.maveneeticketlibrary.api.GetReadyAnswerResponse;
 import ru.russianpost.siberia.Historyrecord;
+import ru.russianpost.siberia.Ticket;
 import ru.russianpost.siberia.ViewHistorySERV;
 import ru.russianpost.siberia.ViewHistorySERV_Service;
 
@@ -121,21 +121,6 @@ public final class FactoryService {
             }
         }
         return lines;
-    }
-
-    private int createSheetHeaderDetail(XSSFSheet sheet, int rowNum, List<Viewhistory> t) {
-        for (Viewhistory h : t) {
-            Row r = sheet.createRow(++rowNum);
-            r.createCell(0).setCellValue(h.getBarcode());
-            r.createCell(1).setCellValue(h.getOperationaddressIndex());
-            r.createCell(2).setCellValue(h.getDestinationaddressIndex());
-            r.createCell(3).setCellValue(h.getOperdate().toString());
-            r.createCell(4).setCellValue(h.getOpertypeid());
-            r.createCell(5).setCellValue(h.getNameattr());
-            r.createCell(6).setCellValue(h.getNametype());
-            r.createCell(8).setCellValue(h.getOperatondelta());
-        }
-        return rowNum;
     }
 
     private boolean validateTicketFormat(List<String> lines, String barcode) {
@@ -353,41 +338,43 @@ public final class FactoryService {
             // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
             Row row = sheet.createRow(rowNum);
             row.createCell(0).setCellValue("ШПИ");
-            row.createCell(1).setCellValue("Дата");
-            row.createCell(2).setCellValue("Финал");
+            row.createCell(1).setCellValue("Финал");
+            row.createCell(2).setCellValue("Индекс обработки");
+            row.createCell(3).setCellValue("Индекс направления");
+            row.createCell(4).setCellValue("Дата операции");
+            row.createCell(5).setCellValue("ID Операции");
+            row.createCell(6).setCellValue("Операция");
+            row.createCell(7).setCellValue("ID Атрибута");
+            row.createCell(8).setCellValue("Атрибут");
+            row.createCell(9).setCellValue("Часы");
+
             ViewHistorySERV_Service service = new ViewHistorySERV_Service();
             ViewHistorySERV port = service.getViewHistorySERVPort();
             FindTicket parameters = new FindTicket();
-            int i = 1;
             for (String line : tasklines) {
                 try { // Call Web Service Operation
                     Ticket tk = port.findTicket(line);
                     if (tk != null) {
-                        Row r1 = sheet.createRow(++rowNum);
-                        r1.createCell(0).setCellValue(tk.getReturn().getBarcode());
-                        r1.createCell(1).setCellValue(tk.getReturn().getDateFetch().toString());
-                        r1.createCell(2).setCellValue(tk.getReturn().isIsFinal());
-                        util.LogDebug(tk.getReturn().getBarcode());
-                        if ("63097717074645".equals(tk.getReturn().getBarcode())) {
-                            i++;
-                        }
-                        for (Historyrecord h : tk.getReturn().getHistoryrecord()) {
-                            Row r2 = sheet.createRow(++rowNum);
-                            r2.createCell(1).setCellValue(h.getOperationAddressIndex());
-                            r2.createCell(2).setCellValue(h.getDestinationAddressIndex());
-                            r2.createCell(3).setCellValue(h.getOperDate().toString());
-                            r2.createCell(4).setCellValue(h.getOperTypeID());
-                            r2.createCell(5).setCellValue(h.getOperTypeName());
-                            r2.createCell(6).setCellValue(h.getOperAttrID());
-                            r2.createCell(7).setCellValue(h.getOperAttrName());
-                            r2.createCell(8).setCellValue(h.getOperatonDelta());
+                        util.LogDebug(tk.getBarcode());
+                        for (Historyrecord h : tk.getHistoryrecord()) {
+                            Row r1 = sheet.createRow(++rowNum);
+                            r1.createCell(0).setCellValue(tk.getBarcode());
+                            r1.createCell(1).setCellValue(tk.isIsFinal());
+                            r1.createCell(2).setCellValue(tk.getRecpIndex());
+                            r1.createCell(3).setCellValue(h.getDestinationAddressIndex());
+                            r1.createCell(4).setCellValue(h.getOperDate().toString());
+                            r1.createCell(5).setCellValue(h.getOperTypeID());
+                            r1.createCell(6).setCellValue(h.getOperTypeName());
+                            r1.createCell(7).setCellValue(h.getOperAttrID());
+                            r1.createCell(8).setCellValue(h.getOperAttrName());
+                            r1.createCell(9).setCellValue(h.getOperatonDelta() / 60);
                         }
                         publish(rowNum);
                     }
                 } catch (Exception ex) {
                     util.LogErr(ex.getMessage());
                 }
-                p.progress(i++);
+                p.progress(rowNum);
             }
             p.finish();
             // записываем созданный в памяти Excel документ в файл
@@ -406,6 +393,7 @@ public final class FactoryService {
 
         @Override
         protected void done() {
+            addlog("Ok!\n");
             util.LogDebug("Load final");
             tasklines.clear();
         }
@@ -464,27 +452,41 @@ public final class FactoryService {
                 // создание листа с названием "Просто лист"
                 XSSFSheet sheet = workbook.createSheet("ШПИ");
                 // счетчик для строк
-                int rowNum = 0;
+                int rowNum = 1;
                 // создаем подписи к столбцам (это будет первая строчка в листе Excel файла)
                 Row row = sheet.createRow(rowNum);
                 row.createCell(0).setCellValue("ШПИ");
-                row.createCell(1).setCellValue("Дата");
-                row.createCell(2).setCellValue("Финал");
+                row.createCell(1).setCellValue("Финал");
+                row.createCell(2).setCellValue("Индекс обработки");
+                row.createCell(3).setCellValue("Индекс направления");
+                row.createCell(4).setCellValue("Дата операции");
+                row.createCell(5).setCellValue("Операция");
+                row.createCell(6).setCellValue("Атрибут");
+                row.createCell(7).setCellValue("Часы");
                 GetTicketSessionSRV_Service service = new GetTicketSessionSRV_Service();
                 GetTicketSessionSRV port = service.getGetTicketSessionSRVPort();
                 GetTicket parameters = new GetTicket();
-                int i = 1;
                 for (String line : lines) {
                     try { // Call Web Service Operation
                         parameters.setBarcode(line);
                         GetTicketResponse tk = port.getTicket(parameters);
                         if (tk != null) {
-                            rowNum = createSheetHeaderDetail(sheet, ++rowNum, tk.getReturn());
+                            for (Viewhistory h : tk.getReturn()) {
+                                Row r = sheet.createRow(++rowNum);
+                                r.createCell(0).setCellValue(h.getBarcode());
+                                r.createCell(1).setCellValue(h.getOperationaddressIndex());
+                                r.createCell(2).setCellValue(h.getDestinationaddressIndex());
+                                r.createCell(3).setCellValue(h.getOperdate().toString());
+                                r.createCell(4).setCellValue(h.getOpertypeid());
+                                r.createCell(5).setCellValue(h.getNameattr());
+                                r.createCell(6).setCellValue(h.getNametype());
+                                r.createCell(7).setCellValue(h.getOperatondelta() / 60);
+                            }
                         }
                     } catch (Exception ex) {
                         util.LogErr(ex.getMessage());
                     }
-                    p.progress(i++);
+                    p.progress(rowNum);
                 }
                 // записываем созданный в памяти Excel документ в файл
                 try (FileOutputStream f = new FileOutputStream(saveFile)) {

@@ -10,16 +10,10 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
-import org.openide.windows.IOProvider;
-import org.openide.windows.InputOutput;
 import ru.russianpost.siberia.GetTicket;
 import ru.russianpost.siberia.GetTicketResponse;
 import ru.russianpost.siberia.GetTicketSessionSRV;
 import ru.russianpost.siberia.GetTicketSessionSRV_Service;
-import ru.russianpost.siberia.maveneeticketlibrary.api.FindBarcode;
-import ru.russianpost.siberia.maveneeticketlibrary.api.FindBarcodeResponse;
-import ru.russianpost.siberia.maveneeticketlibrary.api.ViewHistorySERV;
-import ru.russianpost.siberia.maveneeticketlibrary.api.ViewHistorySERV_Service;
 
 /**
  * Top component which displays something.
